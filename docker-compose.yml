@@ -1,0 +1,55 @@
+ 
+version: '3'
+services:
+  test:
+    image: node
+    working_dir: /usr/src/app
+    volumes:
+      - "./:/usr/src/app"
+    command:
+      npm run test
+    depends_on:
+      - web
+
+  web:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    # Host port proxy to 80
+    ports:
+      - "80:3000"
+    volumes:
+      - "./:/usr/src/app"
+    restart: always
+    depends_on:
+      - db
+    environment:
+      # If a production enviroment is desired, set the APP_ENV variable to production
+      # APP_ENV: 'production'
+      APP_ENV: 'development'
+
+  db:
+    image: mysql
+    restart: always
+    volumes:
+        - ./data/init.sql:/data/application/init.sql
+    command: --init-file /data/application/init.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    container_name: db
+    ports:
+      - 3306:3306
+    expose:
+      - "3306"
+    cap_add:
+      - SYS_NICE  
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    depends_on:
+      - "db"
+    logging:
+      driver: "none"  

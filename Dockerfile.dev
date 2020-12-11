@@ -1,0 +1,11 @@
+FROM node:alpine 
+
+WORKDIR /usr/src/app/app
+
+ENV PATH /node_modules/.bin:$PATH
+
+COPY ./ ./
+RUN npm install
+RUN npm run client-install
+
+CMD ["npm", "run", "dev"]
